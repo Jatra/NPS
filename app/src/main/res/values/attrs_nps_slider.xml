@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="NpsSlider">
+        <attr name="size" format="dimension" />
+        <attr name="npsTrackColor" format="color" />
+        <attr name="npsThumbColor" format="color" />
+        <attr name="npsThumbTextColor" format="color" />
+    </declare-styleable>
+</resources>

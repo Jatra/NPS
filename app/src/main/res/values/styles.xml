@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="Widget.Theme.NPS.MyView" parent="">
+        <item name="android:background">@color/gray_400</item>
+        <item name="npsTrackColor">@color/light_blue_400</item>
+    </style>
+</resources>

@@ -1,0 +1,21 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <uk.co.jatra.nps.component.NpsSlider
+        android:id="@+id/npsSlider"
+        style="@style/Widget.Theme.NPS.MyView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="16dp"
+        app:size="16sp"
+        app:npsTrackColor="@color/black"
+        app:npsThumbColor="@color/green"
+        app:npsThumbTextColor="@color/white"
+        />
+
+</FrameLayout>
