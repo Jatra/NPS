@@ -11,17 +11,20 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import uk.co.jatra.nps.R
 
+data class NpsEvent(val nps: Int, val changing: Boolean)
 
 //TODO make these an attribute. Or at least use the given UI spec.
 private const val TRACK_END_RADIUS = 10f
 private const val THUMB_CORNER_RADIUS = 10f
 
 private val TAG = NpsSlider::class.java.simpleName
+
 class NpsSlider : View {
 
     private var _trackColor: Int = Color.BLACK // TODO: use a default from R.color...
@@ -49,11 +52,12 @@ class NpsSlider : View {
     private var textOffsetX = 0f
     private var textOffsetY = 0f
 
-    private var nps: Int? = null
-    private var lastMotionEvent: MotionEvent? = null
+    private var lastNpsEvent: NpsEvent? = null
 
-    private val _value: MutableStateFlow<Int?> = MutableStateFlow(nps)
-    public val value: StateFlow<Int?> = _value
+    private val _value: MutableStateFlow<NpsEvent?> = MutableStateFlow(null)
+    val value: StateFlow<NpsEvent?> = _value
+    val nps: Int?
+        get() = lastNpsEvent?.nps
 
     var trackColor: Int
         get() = _trackColor
@@ -141,7 +145,55 @@ class NpsSlider : View {
         }
 
         invalidateTextPaintAndMeasurements()
+    }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val resolvedWidth = resolveSizeAndState(minimumWidth, widthMeasureSpec, 0)
+        val resolvedHeight = resolveSizeAndState(minimumHeight, heightMeasureSpec, 0)
+
+
+        setMeasuredDimension(resolvedWidth, resolvedHeight)
+    }
+
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, layoutBottom: Int) {
+        contentWidth = (width - paddingLeft - paddingRight).toFloat()
+        contentHeight = (height - paddingTop - paddingBottom).toFloat()
+        trackBottom = paddingTop + contentHeight
+        boxWidth = contentWidth / 11
+        textOffsetX = (boxWidth - textWidth) / 2
+        textOffsetY = trackBottom - textHeight / 3
+
+        super.onLayout(changed, left, top, right, layoutBottom)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        canvas.drawARGB(255, 255, 255, 255)
+        //Draw the track
+        drawTrack(canvas)
+
+        nps?.let {
+            drawThumb(canvas)
+        }
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+//            Log.d(TAG, "MotionEvent $nps ${MotionEvent.actionToString(it.action)}")
+            val newNps = it.toNps()
+            if (newNps != lastNpsEvent) {
+                lastNpsEvent = newNps
+                _value.value = newNps
+                invalidate()
+            }
+        }
+        return true
+    }
+
+    fun clear() {
+        lastNpsEvent = null
+        _value.value = null
+        invalidate()
     }
 
     private fun invalidateTextPaintAndMeasurements() {
@@ -168,57 +220,14 @@ class NpsSlider : View {
         paddingBottomF = paddingBottom.toFloat()
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val resolvedWidth = resolveSizeAndState(minimumWidth, widthMeasureSpec, 0)
-        val resolvedHeight = resolveSizeAndState(minimumHeight, heightMeasureSpec, 0)
-
-
-        setMeasuredDimension(resolvedWidth, resolvedHeight)
-    }
-
-
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, layoutBottom: Int) {
-        contentWidth = (width - paddingLeft - paddingRight).toFloat()
-        contentHeight = (height - paddingTop - paddingBottom).toFloat()
-        trackBottom = paddingTop + contentHeight
-        boxWidth = contentWidth / 11
-        textOffsetX = (boxWidth - textWidth) / 2
-        textOffsetY = trackBottom - textHeight/3
-
-        super.onLayout(changed, left, top, right, layoutBottom)
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-
-        //Draw the track
-        drawTrack(canvas)
-
-        nps?.let {
-            drawThumb(canvas)
-        }
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        var newNps = nps
-        lastMotionEvent = event
-        event?.let {
-            newNps = it.toNps()
-        }
-        if (newNps != nps) {
-            nps = newNps
-            _value.value = nps
-            invalidate()
-        }
-//        Log.d(TAG, "MotionEvent: NPS: ${event?.toNps()} $event")
-        return true
-    }
-
-    private fun MotionEvent.toNps() : Int = ((x - paddingLeft) / boxWidth).toInt().coerceIn(0..10)
+    private fun MotionEvent.toNps(): NpsEvent =
+        NpsEvent(
+            nps = ((x - paddingLeft) / boxWidth).toInt().coerceIn(0..10),
+            changing = action != ACTION_UP)
 
     private fun drawTrack(canvas: Canvas) {
 
-        canvas.drawRoundRect(paddingLeftF, paddingTopF, paddingLeft+contentWidth,
+        canvas.drawRoundRect(paddingLeftF, paddingTopF, paddingLeft + contentWidth,
             trackBottom, TRACK_END_RADIUS, TRACK_END_RADIUS, trackPaint)
 
         var x = paddingLeftF
@@ -239,8 +248,14 @@ class NpsSlider : View {
 //        Log.d(TAG, "NPS: $nps")
         nps?.let {
             val x = paddingLeftF + (it * boxWidth)
-            canvas.drawRoundRect(x-5, paddingTopF-5,  x+boxWidth+5, trackBottom+5, THUMB_CORNER_RADIUS, THUMB_CORNER_RADIUS, thumbPaint)
-            canvas.drawText(it.toString(), x+ textOffsetX, textOffsetY, thumbTextPaint)
+            canvas.drawRoundRect(x - 5,
+                paddingTopF - 5,
+                x + boxWidth + 5,
+                trackBottom + 5,
+                THUMB_CORNER_RADIUS,
+                THUMB_CORNER_RADIUS,
+                thumbPaint)
+            canvas.drawText(it.toString(), x + textOffsetX, textOffsetY, thumbTextPaint)
         }
     }
 }

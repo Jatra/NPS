@@ -20,8 +20,20 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             binding.npsSlider.value.collect {
-                Log.d("NPS", it.toString())
+                it?.run {
+
+                    if (changing) Log.d("NPS","Tracking NPS to ${it.nps}")
+                    else {
+                        Log.d("NPS", "Selected NPS: ${it.nps}")
+                        binding.nps.text = it.nps.toString()
+                    }
+                }
             }
+        }
+
+        binding.clearButton.setOnClickListener {
+            binding.nps.text = "--"
+            binding.npsSlider.clear()
         }
     }
 }
