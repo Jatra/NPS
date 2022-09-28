@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Paint.Align.CENTER
 import android.graphics.Paint.Align.LEFT
 import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
@@ -126,12 +127,12 @@ class NpsSlider : View {
 
         trackTextPaint = TextPaint().apply {
             flags = Paint.ANTI_ALIAS_FLAG
-            textAlign = LEFT
+            textAlign = CENTER
         }
 
         thumbTextPaint = TextPaint().apply {
             flags = Paint.ANTI_ALIAS_FLAG
-            textAlign = LEFT
+            textAlign = CENTER
         }
 
         trackPaint = Paint().apply {
@@ -161,7 +162,7 @@ class NpsSlider : View {
         contentHeight = (height - paddingTop - paddingBottom).toFloat()
         trackBottom = paddingTop + contentHeight
         boxWidth = contentWidth / 11
-        textOffsetX = (boxWidth - textWidth) / 2
+        textOffsetX = boxWidth / 2
         textOffsetY = paddingTop + contentHeight/2 + textBaseLine
 
         super.onLayout(changed, left, top, right, layoutBottom)
