@@ -9,7 +9,6 @@ import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
 import android.text.TextPaint
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_UP
 import android.view.View
@@ -38,6 +37,7 @@ class NpsSlider : View {
     private lateinit var thumbPaint: Paint
     private var textWidth: Float = 0f
     private var textHeight: Float = 0f
+    private var textBaseLine = 0f
 
     private var paddingLeftF = 0f
     private var paddingTopF = 0f
@@ -162,12 +162,13 @@ class NpsSlider : View {
         trackBottom = paddingTop + contentHeight
         boxWidth = contentWidth / 11
         textOffsetX = (boxWidth - textWidth) / 2
-        textOffsetY = trackBottom - textHeight / 3
+        textOffsetY = paddingTop + contentHeight/2 + textBaseLine
 
         super.onLayout(changed, left, top, right, layoutBottom)
     }
 
     override fun onDraw(canvas: Canvas) {
+        //FIXME use background color
         canvas.drawARGB(255, 255, 255, 255)
         //Draw the track
         drawTrack(canvas)
@@ -201,7 +202,9 @@ class NpsSlider : View {
             textSize = fontSize
             color = trackColor
             textWidth = measureText("10") //fixme
-            textHeight = fontMetrics.bottom - fontMetrics.top
+            textHeight =  fontMetrics.descent - fontMetrics.ascent
+            textBaseLine =   - fontMetrics.ascent / 2  - fontMetrics.descent /2
+
         }
         thumbTextPaint.run {
             textSize = fontSize
@@ -232,15 +235,14 @@ class NpsSlider : View {
 
         var x = paddingLeftF
         var textX = x + textOffsetX
-        val textY = textOffsetY
 
         //The textX needs to be a bit smarter, since the "0" to "9" are a different width than "10"
-        canvas.drawText("0", textX, textY, trackTextPaint)
+        canvas.drawText("0", textX, textOffsetY, trackTextPaint)
         for (i in 1..10) {
             x += boxWidth
             textX += boxWidth
             canvas.drawLine(x, paddingTopF, x, trackBottom, trackPaint)
-            canvas.drawText(i.toString(), textX, textY, trackTextPaint)
+            canvas.drawText(i.toString(), textX, textOffsetY, trackTextPaint)
         }
     }
 
