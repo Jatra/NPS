@@ -23,7 +23,11 @@
         app:npsThumbColor="@color/dark_green"
         app:npsThumbTextColor="@color/white"
         app:npsTrackColor="@color/black"
-        app:size="16sp" />
+        app:npsLabelTextColor="@color/black"
+        app:npsMaxLabel="Oh yes!"
+        app:npsMinLabel="No way!"
+        app:npsLabelFontSize="14sp"
+        app:npsTrackFontSize="16sp" />
 
     <TextView
         android:id="@+id/nps"

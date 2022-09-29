@@ -1,8 +1,12 @@
 <resources>
     <declare-styleable name="NpsSlider">
-        <attr name="size" format="dimension" />
+        <attr name="npsTrackFontSize" format="dimension" />
         <attr name="npsTrackColor" format="color" />
         <attr name="npsThumbColor" format="color" />
         <attr name="npsThumbTextColor" format="color" />
+        <attr name="npsLabelTextColor" format="color" />
+        <attr name="npsLabelFontSize" format="dimension" />
+        <attr name="npsMinLabel" format="string"/>
+        <attr name="npsMaxLabel" format="string"/>
     </declare-styleable>
 </resources>

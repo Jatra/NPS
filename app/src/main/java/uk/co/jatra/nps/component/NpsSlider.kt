@@ -5,7 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Paint.Align.CENTER
+import android.graphics.Paint.Align.*
 import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
 import android.text.TextPaint
@@ -30,15 +30,22 @@ class NpsSlider : View {
     private var _trackColor: Int = Color.BLACK // TODO: use a default from R.color...
     private var _thumbColor: Int = Color.GREEN // TODO: use a default from R.color...
     private var _thumbTextColor: Int = Color.WHITE // TODO: use a default from R.color...
+    private var _labelTextColor: Int = Color.BLACK // TODO: use a default from R.color...
     private var _fontSize: Float = 12f // TODO: use a default from R.dimen...
+    private var _labelFontSize: Float = 10f // TODO: use a default from R.dimen...
+    private var _minLabel: String = "Never" // TODO: use a default from R.string...
+    private var _maxLabel: String = "Definitely" // TODO: use a default from R.string...
 
     private lateinit var trackTextPaint: TextPaint
     private lateinit var thumbTextPaint: TextPaint
+    private lateinit var labelTextPaint: TextPaint
     private lateinit var trackPaint: Paint
     private lateinit var thumbPaint: Paint
     private var textWidth: Float = 0f
     private var textHeight: Float = 0f
     private var textBaseLine = 0f
+    private var labelHeight: Float = 0f
+    private var labelBaseLine = 0f
 
     private var paddingLeftF = 0f
     private var paddingTopF = 0f
@@ -88,6 +95,34 @@ class NpsSlider : View {
             invalidateTextPaintAndMeasurements()
         }
 
+    var labelFontSize: Float
+        get() = _labelFontSize
+        set(value) {
+            _labelFontSize = value
+            invalidateTextPaintAndMeasurements()
+        }
+
+    var labelTextColor: Int
+        get() = _labelTextColor
+        set(value) {
+            _labelTextColor = value
+            invalidateTextPaintAndMeasurements()
+        }
+
+    var minLabel: String
+        get() = _minLabel
+        set(value) {
+            _minLabel = value
+            invalidateTextPaintAndMeasurements()
+        }
+
+    var maxLabel: String
+        get() = _maxLabel
+        set(value) {
+            _maxLabel = value
+            invalidateTextPaintAndMeasurements()
+        }
+
     constructor(context: Context) : super(context) {
         init(null, 0)
     }
@@ -116,11 +151,24 @@ class NpsSlider : View {
         _thumbTextColor = a.getColor(
             R.styleable.NpsSlider_npsThumbTextColor,
             thumbTextColor)
+        _labelTextColor = a.getColor(
+            R.styleable.NpsSlider_npsLabelTextColor,
+            thumbTextColor)
+
+        _minLabel = a.getString(
+            R.styleable.NpsSlider_npsMinLabel,
+        ) ?: _minLabel
+        _maxLabel = a.getString(
+            R.styleable.NpsSlider_npsMaxLabel,
+        ) ?: _maxLabel
+        _labelFontSize = a.getDimension(
+            R.styleable.NpsSlider_npsLabelFontSize,
+            labelFontSize)
 
         // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
         // values that should fall on pixel boundaries.
         _fontSize = a.getDimension(
-            R.styleable.NpsSlider_size,
+            R.styleable.NpsSlider_npsTrackFontSize,
             fontSize)
 
         a.recycle()
@@ -131,6 +179,11 @@ class NpsSlider : View {
         }
 
         thumbTextPaint = TextPaint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            textAlign = CENTER
+        }
+
+        labelTextPaint = TextPaint().apply {
             flags = Paint.ANTI_ALIAS_FLAG
             textAlign = CENTER
         }
@@ -159,7 +212,7 @@ class NpsSlider : View {
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, layoutBottom: Int) {
         contentWidth = (width - paddingLeft - paddingRight).toFloat()
-        contentHeight = (height - paddingTop - paddingBottom).toFloat()
+        contentHeight = (height - paddingTop - paddingBottom - labelHeight)
         trackBottom = paddingTop + contentHeight
         boxWidth = contentWidth / 11
         textOffsetX = boxWidth / 2
@@ -173,7 +226,7 @@ class NpsSlider : View {
         canvas.drawARGB(255, 255, 255, 255)
         //Draw the track
         drawTrack(canvas)
-
+        drawLabels(canvas)
         nps?.let {
             drawThumb(canvas)
         }
@@ -215,9 +268,15 @@ class NpsSlider : View {
         thumbPaint.run {
             color = thumbColor
         }
+        labelTextPaint.run {
+            textSize = labelFontSize
+            color = labelTextColor
+            labelHeight =  fontMetrics.descent - fontMetrics.ascent
+            labelBaseLine =   - fontMetrics.ascent / 2  - fontMetrics.descent /2
+        }
 
         minimumWidth = (textWidth * 11).toInt() + paddingRight + paddingLeft
-        minimumHeight = (textHeight * 2.375).toInt() + paddingTop + paddingBottom
+        minimumHeight = (textHeight * 2.375).toInt() + paddingTop + paddingBottom + labelHeight.toInt()
 
         paddingLeftF = paddingLeft.toFloat()
         paddingTopF = paddingTop.toFloat()
@@ -245,6 +304,13 @@ class NpsSlider : View {
             canvas.drawLine(x, paddingTopF, x, trackBottom, trackPaint)
             canvas.drawText(i.toString(), textX, textOffsetY, trackTextPaint)
         }
+    }
+
+    private fun drawLabels(canvas: Canvas) {
+        labelTextPaint.textAlign = LEFT
+        canvas.drawText(minLabel, paddingLeftF, trackBottom + labelHeight, labelTextPaint)
+        labelTextPaint.textAlign = RIGHT
+        canvas.drawText(maxLabel, paddingLeftF+contentWidth, trackBottom+labelHeight, labelTextPaint)
     }
 
     private fun drawThumb(canvas: Canvas) {
