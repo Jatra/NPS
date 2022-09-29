@@ -20,7 +20,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:npsThumbColor="@color/green"
+        app:npsThumbColor="@color/dark_green"
         app:npsThumbTextColor="@color/white"
         app:npsTrackColor="@color/black"
         app:size="16sp" />

@@ -20,7 +20,7 @@ data class NpsEvent(val nps: Int, val changing: Boolean)
 
 //TODO make these an attribute. Or at least use the given UI spec.
 private const val TRACK_END_RADIUS = 10f
-private const val THUMB_CORNER_RADIUS = 10f
+private const val THUMB_CORNER_RADIUS = 12f
 
 private val TAG = NpsSlider::class.java.simpleName
 
@@ -215,7 +215,7 @@ class NpsSlider : View {
         }
 
         minimumWidth = (textWidth * 11).toInt() + paddingRight + paddingLeft
-        minimumHeight = (textHeight * 1.5).toInt() + paddingTop + paddingBottom
+        minimumHeight = (textHeight * 2.375).toInt() + paddingTop + paddingBottom
 
         paddingLeftF = paddingLeft.toFloat()
         paddingTopF = paddingTop.toFloat()
@@ -250,10 +250,10 @@ class NpsSlider : View {
 //        Log.d(TAG, "NPS: $nps")
         nps?.let {
             val x = paddingLeftF + (it * boxWidth)
-            canvas.drawRoundRect(x - 5,
-                paddingTopF - 5,
-                x + boxWidth + 5,
-                trackBottom + 5,
+            canvas.drawRoundRect(x-1,
+                paddingTopF - 10,
+                x + boxWidth + 2,
+                trackBottom + 10,
                 THUMB_CORNER_RADIUS,
                 THUMB_CORNER_RADIUS,
                 thumbPaint)
