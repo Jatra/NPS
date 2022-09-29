@@ -1,11 +1,11 @@
 package uk.co.jatra.nps.component
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.Align.CENTER
-import android.graphics.Paint.Align.LEFT
 import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
 import android.text.TextPaint
@@ -23,7 +23,7 @@ data class NpsEvent(val nps: Int, val changing: Boolean)
 private const val TRACK_END_RADIUS = 10f
 private const val THUMB_CORNER_RADIUS = 12f
 
-private val TAG = NpsSlider::class.java.simpleName
+//private val TAG = NpsSlider::class.java.simpleName
 
 class NpsSlider : View {
 
@@ -179,6 +179,7 @@ class NpsSlider : View {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.let {
 //            Log.d(TAG, "MotionEvent $nps ${MotionEvent.actionToString(it.action)}")
@@ -237,7 +238,6 @@ class NpsSlider : View {
         var x = paddingLeftF
         var textX = x + textOffsetX
 
-        //The textX needs to be a bit smarter, since the "0" to "9" are a different width than "10"
         canvas.drawText("0", textX, textOffsetY, trackTextPaint)
         for (i in 1..10) {
             x += boxWidth
